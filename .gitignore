@@ -1,0 +1,39 @@
+# Build directories
+build-*/
+build/
+
+# Qt Creator files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.autosave
+
+# CMake build files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cbp
+*.layout
+
+# Qt moc, uic, rcc generated files
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Object files and binaries
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Backup files
+*~
+*.swp
+*.tmp
+
+# VSCode settings (if any)
+.vscode/
