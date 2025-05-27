@@ -4,10 +4,64 @@
 #include "itkExtractImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
 
+#include <opencv2/opencv.hpp>
+
+// QImage → cv::Mat
+cv::Mat QImageToMat(const QImage &image) {
+    return cv::Mat(image.height(), image.width(), CV_8UC1,
+                   const_cast<uchar*>(image.bits()), image.bytesPerLine()).clone();
+}
+
+// cv::Mat → QImage
+QImage MatToQImage(const cv::Mat &mat) {
+    QImage image(mat.cols, mat.rows, QImage::Format_Grayscale8);
+    for (int y = 0; y < mat.rows; ++y)
+        for (int x = 0; x < mat.cols; ++x)
+            image.setPixel(x, y, qRgb(mat.at<uchar>(y, x), mat.at<uchar>(y, x), mat.at<uchar>(y, x)));
+    return image;
+}
+
+// Filtros aplicados
+
+QImage aplicarEcualizacionHistograma(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::equalizeHist(img, result);
+    return MatToQImage(result);
+}
+
+QImage aplicarSuavizadoGaussiano(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::GaussianBlur(img, result, cv::Size(5, 5), 1.5);
+    return MatToQImage(result);
+}
+
+QImage aplicarDeteccionBordes(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::Canny(img, result, 100, 200);
+    return MatToQImage(result);
+}
+
+QImage aplicarManipulacionPixeles(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat stretched;
+    img.convertTo(stretched, -1, 1.5, 20);  // contraste + brillo
+    return MatToQImage(stretched);
+}
+
+QImage aplicarMorfologiaTopHat(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
+    cv::morphologyEx(img, result, cv::MORPH_TOPHAT, kernel);
+    return MatToQImage(result);
+}
 
 FiltersWindow::FiltersWindow(QWidget *parent)
     : QDialog(parent),
-    ui(new Ui::filterswindow)  // Debe coincidir con el nombre generado por Qt Designer
+    ui(new Ui::filterswindow)
 {
     ui->setupUi(this);
 }
@@ -34,12 +88,22 @@ void FiltersWindow::on_sliceSlider_valueChanged(int value) {
 void FiltersWindow::mostrarSlice(int sliceIndex) {
     if (!volumen3D) return;
 
-    QImage img = extraerSliceComoQImage(sliceIndex);
-    ui->imageLabelDB->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabelDB->size(), Qt::KeepAspectRatio));
-    ui->imageLabelEH->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabelEH->size(), Qt::KeepAspectRatio));
-    ui->imageLabelMP->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabelMP->size(), Qt::KeepAspectRatio));
-    ui->imageLabelOM->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabelOM->size(), Qt::KeepAspectRatio));
-    ui->imageLabelSI->setPixmap(QPixmap::fromImage(img).scaled(ui->imageLabelSI->size(), Qt::KeepAspectRatio));
+    QImage original = extraerSliceComoQImage(sliceIndex);
+
+    ui->imageLabelEH->setPixmap(QPixmap::fromImage(
+                                    aplicarEcualizacionHistograma(original)).scaled(ui->imageLabelEH->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelSI->setPixmap(QPixmap::fromImage(
+                                    aplicarSuavizadoGaussiano(original)).scaled(ui->imageLabelSI->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelDB->setPixmap(QPixmap::fromImage(
+                                    aplicarDeteccionBordes(original)).scaled(ui->imageLabelDB->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelMP->setPixmap(QPixmap::fromImage(
+                                    aplicarManipulacionPixeles(original)).scaled(ui->imageLabelMP->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelOM->setPixmap(QPixmap::fromImage(
+                                    aplicarMorfologiaTopHat(original)).scaled(ui->imageLabelOM->size(), Qt::KeepAspectRatio));
 }
 
 QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
@@ -55,7 +119,7 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
     ImageType3D::SizeType size = inputRegion.GetSize();
     ImageType3D::IndexType start = inputRegion.GetIndex();
 
-    size[2] = 0;               // Extraer solo un slice (en Z)
+    size[2] = 0;
     start[2] = sliceIndex;
 
     ImageType3D::RegionType desiredRegion;
@@ -104,4 +168,3 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
     }
     return image;
 }
-

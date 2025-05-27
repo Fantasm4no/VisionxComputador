@@ -150,6 +150,19 @@
      <string>AplicarFIltros</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnEstadisticas">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>510</y>
+      <width>131</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mostrar estadísticas</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -157,7 +170,7 @@
      <x>0</x>
      <y>0</y>
      <width>799</width>
-     <height>23</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
