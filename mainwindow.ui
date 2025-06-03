@@ -6,22 +6,28 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
+    <width>1188</width>
     <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb( 245, 245, 220 );</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QSlider" name="sliceSlider">
     <property name="geometry">
      <rect>
       <x>160</x>
-      <y>520</y>
+      <y>530</y>
       <width>461</width>
       <height>16</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
     </property>
     <property name="orientation">
      <enum>Qt::Orientation::Horizontal</enum>
@@ -32,7 +38,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>401</width>
+      <width>411</width>
       <height>501</height>
      </rect>
     </property>
@@ -47,22 +53,29 @@
       <rect>
        <x>60</x>
        <y>200</y>
-       <width>281</width>
+       <width>301</width>
        <height>231</height>
       </rect>
      </property>
      <property name="text">
       <string/>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
     </widget>
     <widget class="QPushButton" name="loadFile">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>130</y>
-       <width>141</width>
+       <x>140</x>
+       <y>120</y>
+       <width>171</width>
        <height>26</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
      </property>
      <property name="text">
       <string>Cargar archivo t1ce</string>
@@ -73,9 +86,13 @@
       <rect>
        <x>80</x>
        <y>50</y>
-       <width>241</width>
+       <width>281</width>
        <height>21</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
      </property>
      <property name="text">
       <string/>
@@ -85,9 +102,9 @@
    <widget class="QFrame" name="frameseg">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>410</x>
       <y>0</y>
-      <width>401</width>
+      <width>421</width>
       <height>501</height>
      </rect>
     </property>
@@ -100,11 +117,15 @@
     <widget class="QPushButton" name="loadFile2">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>130</y>
-       <width>141</width>
+       <x>140</x>
+       <y>120</y>
+       <width>161</width>
        <height>26</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
      </property>
      <property name="text">
       <string>Cargar archivo seg</string>
@@ -119,6 +140,10 @@
        <height>21</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -128,12 +153,15 @@
       <rect>
        <x>50</x>
        <y>200</y>
-       <width>281</width>
+       <width>311</width>
        <height>231</height>
       </rect>
      </property>
      <property name="text">
       <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </widget>
@@ -142,9 +170,13 @@
      <rect>
       <x>10</x>
       <y>520</y>
-      <width>111</width>
+      <width>141</width>
       <height>24</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
     </property>
     <property name="text">
      <string>AplicarFIltros</string>
@@ -153,14 +185,83 @@
    <widget class="QPushButton" name="btnEstadisticas">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>510</y>
-      <width>131</width>
+      <x>640</x>
+      <y>520</y>
+      <width>181</width>
       <height>34</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
+    </property>
     <property name="text">
      <string>Mostrar estadísticas</string>
+    </property>
+   </widget>
+   <widget class="QFrame" name="frameseg_2">
+    <property name="geometry">
+     <rect>
+      <x>830</x>
+      <y>50</y>
+      <width>291</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Shape::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Shadow::Raised</enum>
+    </property>
+    <widget class="QLabel" name="labelImagen3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>90</y>
+       <width>231</width>
+       <height>241</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>40</y>
+       <width>161</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 11pt &quot;Noto Sans CJK JP&quot;;
+color: rgb(205, 92, 92);</string>
+     </property>
+     <property name="text">
+      <string>Highlighted Image</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="labelUPS">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>460</y>
+      <width>331</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
@@ -169,8 +270,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
-     <height>30</height>
+     <width>1188</width>
+     <height>23</height>
     </rect>
    </property>
   </widget>

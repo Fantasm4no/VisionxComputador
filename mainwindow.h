@@ -4,12 +4,14 @@
 #include <QMainWindow>
 #include <QString>
 #include "filterswindow.h"  // Asegúrate de incluir la clase FiltersWindow
+#include <opencv2/opencv.hpp>
 
 // Incluir ITK
 #include "itkImage.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
+using namespace cv;
 QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow {
@@ -18,6 +20,10 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    // Funciones de conversión (pueden estar públicas o privadas)
+    Mat QImageToMat(const QImage &image);
+    QImage MatToQImage(const Mat &mat);
 
 private slots:
     void on_loadFile_clicked();    // Cargar archivo 1
@@ -49,6 +55,7 @@ private:
     ImageType3D::Pointer cargarImagenITK(const QString &path);
     QImage extraerSliceComoQImage(ImageType3D::Pointer imagen, int sliceIndex);
     void actualizarTotalSlices();
+    void mostrarSegmentacion(int sliceIndex);
 };
 
 #endif // MAINWINDOW_H

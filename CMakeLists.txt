@@ -31,7 +31,8 @@ set(PROJECT_SOURCES
 )
 
 # Crear ejecutable
-add_executable(VisionxComputador ${PROJECT_SOURCES})
+add_executable(VisionxComputador ${PROJECT_SOURCES}
+    descriptionwindow.h descriptionwindow.cpp descriptionwindow.ui)
 
 # Enlazar librerías
 target_link_libraries(VisionxComputador

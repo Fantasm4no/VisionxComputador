@@ -20,6 +20,13 @@ MainWindow::MainWindow(QWidget *parent)
     filtersWindow = new FiltersWindow(this);
 
     connect(ui->checkBoxShowMessage, &QCheckBox::toggled, this, &MainWindow::on_checkBoxShowMessage_toggled);
+    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png"; // Cambia esta ruta
+    QPixmap pixmap(rutaImagen);
+    if (!pixmap.isNull()) {
+        ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        QMessageBox::warning(this, "Error", "No se pudo cargar la imagen.");
+    }
 }
 
 MainWindow::~MainWindow() {
@@ -105,6 +112,7 @@ void MainWindow::actualizarTotalSlices() {
 void MainWindow::on_sliceSlider_valueChanged(int value) {
     currentSlice = value;
     mostrarImagenProcesada(value);
+    mostrarSegmentacion(value);
 }
 
 void MainWindow::mostrarImagenProcesada(int sliceIndex) {
@@ -179,3 +187,69 @@ QImage MainWindow::extraerSliceComoQImage(ImageType3D::Pointer imagen, int slice
     }
     return image;
 }
+
+cv::Mat MainWindow::QImageToMat(const QImage &image) {
+    // Suponemos que la imagen es de formato Grayscale8 (como en tu caso)
+    return cv::Mat(image.height(), image.width(), CV_8UC1,
+                   const_cast<uchar*>(image.bits()), image.bytesPerLine()).clone();
+}
+
+QImage MainWindow::MatToQImage(const cv::Mat &mat) {
+    // Asegúrate que mat es tipo CV_8UC3 (BGR)
+    if (mat.type() == CV_8UC3) {
+        // Convertir de BGR a RGB
+        cv::Mat rgb;
+        cv::cvtColor(mat, rgb, cv::COLOR_BGR2RGB);
+        // Crear QImage desde datos rgb
+        return QImage(rgb.data, rgb.cols, rgb.rows, static_cast<int>(rgb.step), QImage::Format_RGB888).copy();
+    } else if (mat.type() == CV_8UC1) {
+        // Imagen en escala de grises
+        return QImage(mat.data, mat.cols, mat.rows, static_cast<int>(mat.step), QImage::Format_Grayscale8).copy();
+    } else {
+        // Otros formatos: no soportados aquí
+        return QImage();
+    }
+}
+
+void MainWindow::mostrarSegmentacion(int sliceIndex) {
+    if (!imagen3D_1 || !imagen3D_2) return;
+
+    // Extraer slice t1ce como QImage (grayscale)
+    QImage qImgT1ce = extraerSliceComoQImage(imagen3D_1, sliceIndex);
+
+    // Extraer slice segmentación como QImage (grayscale)
+    QImage qImgSeg = extraerSliceComoQImage(imagen3D_2, sliceIndex);
+
+    // Convertir QImage a cv::Mat (escala de grises)
+    cv::Mat matT1ce = QImageToMat(qImgT1ce);
+    cv::Mat matSeg = QImageToMat(qImgSeg);
+
+    // Crear máscara binaria con un umbral
+    cv::Mat maskBinaria;
+    cv::threshold(matSeg, maskBinaria, 10, 255, cv::THRESH_BINARY);
+
+    // Convertir t1ce a imagen color (BGR) para hacer overlay
+    cv::Mat matT1ceColor;
+    cv::cvtColor(matT1ce, matT1ceColor, cv::COLOR_GRAY2BGR);
+
+    // Superponer color rojo semi-transparente donde la máscara es blanca
+    for (int y = 0; y < matT1ceColor.rows; ++y) {
+        for (int x = 0; x < matT1ceColor.cols; ++x) {
+            if (maskBinaria.at<uchar>(y, x) > 0) {
+                cv::Vec3b &pixel = matT1ceColor.at<cv::Vec3b>(y, x);
+                pixel[0] = static_cast<uchar>(pixel[0] * 0.5);          // Azul
+                pixel[1] = static_cast<uchar>(pixel[1] * 0.5);          // Verde
+                pixel[2] = std::min(255, pixel[2] / 2 + 128);           // Rojo más intenso
+            }
+        }
+    }
+
+    // Convertir de nuevo a QImage
+    QImage qImgOverlay = MatToQImage(matT1ceColor);
+
+    // Mostrar las imágenes en cada label
+    ui->labelImagen->setPixmap(QPixmap::fromImage(qImgT1ce).scaled(ui->labelImagen->size(), Qt::KeepAspectRatio));
+    ui->labelImagen2->setPixmap(QPixmap::fromImage(qImgSeg).scaled(ui->labelImagen2->size(), Qt::KeepAspectRatio));
+    ui->labelImagen3->setPixmap(QPixmap::fromImage(qImgOverlay).scaled(ui->labelImagen3->size(), Qt::KeepAspectRatio));
+}
+

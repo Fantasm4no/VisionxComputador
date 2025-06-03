@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>641</width>
-    <height>718</height>
+    <width>961</width>
+    <height>879</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,11 @@
      <x>0</x>
      <y>0</y>
      <width>321</width>
-     <height>221</height>
+     <height>291</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Shape::StyledPanel</enum>
@@ -31,43 +34,65 @@
    <widget class="QLabel" name="imageLabelEH">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>10</y>
+      <x>60</x>
+      <y>50</y>
       <width>201</width>
       <height>201</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="text">
      <string/>
     </property>
    </widget>
-  </widget>
-  <widget class="QFrame" name="DetBor">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>220</y>
-     <width>321</width>
-     <height>221</height>
-    </rect>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::Shape::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Shadow::Raised</enum>
-   </property>
-   <widget class="QLabel" name="imageLabelDB">
+   <widget class="QPushButton" name="DescHE">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>10</y>
-      <width>201</width>
-      <height>201</height>
+      <x>100</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
     <property name="text">
-     <string/>
+     <string>Description</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>10</y>
+      <width>271</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Histogram Equalization</string>
     </property>
    </widget>
   </widget>
@@ -77,8 +102,11 @@
      <x>320</x>
      <y>0</y>
      <width>321</width>
-     <height>221</height>
+     <height>291</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Shape::StyledPanel</enum>
@@ -90,7 +118,7 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>10</y>
+      <y>50</y>
       <width>201</width>
       <height>201</height>
      </rect>
@@ -99,15 +127,66 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>10</y>
+      <width>211</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Image Smoothing</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescIS">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QFrame" name="ManPix">
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>220</y>
+     <y>290</y>
      <width>321</width>
-     <height>221</height>
+     <height>291</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Shape::StyledPanel</enum>
@@ -119,7 +198,7 @@
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>10</y>
+      <y>50</y>
       <width>201</width>
       <height>201</height>
      </rect>
@@ -128,15 +207,66 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>10</y>
+      <width>221</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Pixel Manipulation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescPM">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QFrame" name="OperMorf">
    <property name="geometry">
     <rect>
-     <x>170</x>
-     <y>440</y>
+     <x>640</x>
+     <y>0</y>
      <width>321</width>
-     <height>221</height>
+     <height>291</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Shape::StyledPanel</enum>
@@ -147,8 +277,8 @@
    <widget class="QLabel" name="imageLabelOM">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>10</y>
+      <x>50</x>
+      <y>50</y>
       <width>201</width>
       <height>201</height>
      </rect>
@@ -157,18 +287,348 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>301</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Morphological Operations</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescMO">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QSlider" name="sliceSlider">
    <property name="geometry">
     <rect>
-     <x>120</x>
-     <y>680</y>
+     <x>420</x>
+     <y>690</y>
      <width>431</width>
      <height>16</height>
     </rect>
    </property>
    <property name="orientation">
     <enum>Qt::Orientation::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QFrame" name="UmbBas">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>290</y>
+     <width>321</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Shadow::Raised</enum>
+   </property>
+   <widget class="QLabel" name="imageLabelUB">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>50</y>
+      <width>201</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>10</y>
+      <width>231</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Basic Thresholding</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescBT">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QFrame" name="DetBor">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>290</y>
+     <width>321</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Shadow::Raised</enum>
+   </property>
+   <widget class="QLabel" name="imageLabelDB">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>50</y>
+      <width>201</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>10</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Edge Detection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescED">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QFrame" name="BinRan">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>580</y>
+     <width>321</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Shadow::Raised</enum>
+   </property>
+   <widget class="QLabel" name="imageLabelBR">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>50</y>
+      <width>201</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>10</y>
+      <width>251</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Binarization by Color</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescBC">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>630</y>
+     <width>451</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Noto Serif CJK JP</family>
+     <pointsize>16</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LayoutDirection::RightToLeft</enum>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(205, 92, 92);</string>
+   </property>
+   <property name="text">
+    <string>Scroll to be able to slide between slices</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelUPS">
+   <property name="geometry">
+    <rect>
+     <x>360</x>
+     <y>740</y>
+     <width>571</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
  </widget>

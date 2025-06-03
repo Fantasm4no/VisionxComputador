@@ -1,10 +1,31 @@
 #include "filterswindow.h"
 #include "ui_filterswindow.h"
+#include <QMessageBox>
 
 #include "itkExtractImageFilter.h"
 #include "itkRescaleIntensityImageFilter.h"
 
 #include <opencv2/opencv.hpp>
+
+FiltersWindow::FiltersWindow(QWidget *parent)
+    : QDialog(parent),
+    ui(new Ui::filterswindow)
+{
+    ui->setupUi(this);
+    descWindow = new descriptionwindow(this);
+    descWindow->setWindowModality(Qt::WindowModal);
+    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png"; // Cambia esta ruta
+    QPixmap pixmap(rutaImagen);
+    if (!pixmap.isNull()) {
+        ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    } else {
+        QMessageBox::warning(this, "Error", "No se pudo cargar la imagen.");
+    }
+}
+
+FiltersWindow::~FiltersWindow() {
+    delete ui;
+}
 
 // QImage → cv::Mat
 cv::Mat QImageToMat(const QImage &image) {
@@ -52,29 +73,53 @@ QImage aplicarManipulacionPixeles(const QImage &input) {
 }
 
 QImage aplicarMorfologiaTopHat(const QImage &input) {
+    // Convertir QImage a cv::Mat
+    cv::Mat original = QImageToMat(input);
+
+    // Crear kernel para morfología
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(15, 15));
+
+    // Operaciones morfológicas Top Hat y Black Hat
+    cv::Mat topHat, blackHat, morphResult;
+    cv::morphologyEx(original, topHat, cv::MORPH_TOPHAT, kernel);
+    cv::morphologyEx(original, blackHat, cv::MORPH_BLACKHAT, kernel);
+
+    // Combinar resultados y sumar a original
+    cv::Mat enhanced;
+    cv::subtract(topHat, blackHat, morphResult);
+    cv::add(original, morphResult, enhanced);
+
+    // Normalizar entre 0 y 255
+    cv::normalize(enhanced, enhanced, 0, 255, cv::NORM_MINMAX, CV_8UC1);
+
+    // Crear y aplicar CLAHE
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+    cv::Mat claheResult;
+    clahe->apply(enhanced, claheResult);
+
+    // Convertir resultado a QImage y retornar
+    return MatToQImage(claheResult);
+}
+
+QImage aplicarThreshold(const QImage &input, int umbral = 128) {
     cv::Mat img = QImageToMat(input);
     cv::Mat result;
-    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(11, 11));
-    cv::morphologyEx(img, result, cv::MORPH_TOPHAT, kernel);
+    cv::threshold(img, result, umbral, 255, cv::THRESH_BINARY);
     return MatToQImage(result);
 }
 
-FiltersWindow::FiltersWindow(QWidget *parent)
-    : QDialog(parent),
-    ui(new Ui::filterswindow)
-{
-    ui->setupUi(this);
-}
-
-FiltersWindow::~FiltersWindow() {
-    delete ui;
+QImage aplicarBinarizacionColor(const QImage &input, int low=100, int high=255) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::inRange(img, cv::Scalar(low), cv::Scalar(high), result);
+    return MatToQImage(result);
 }
 
 void FiltersWindow::setVolume(ImageType3D::Pointer volumen) {
-    volumen3D = volumen;
-    if (!volumen3D) return;
+    volumen3D_1 = volumen;
+    if (!volumen3D_1) return;
 
-    totalSlices = volumen3D->GetLargestPossibleRegion().GetSize()[2];
+    totalSlices = volumen3D_1->GetLargestPossibleRegion().GetSize()[2];
     ui->sliceSlider->setMaximum(totalSlices - 1);
     ui->sliceSlider->setValue(0);
 
@@ -86,7 +131,7 @@ void FiltersWindow::on_sliceSlider_valueChanged(int value) {
 }
 
 void FiltersWindow::mostrarSlice(int sliceIndex) {
-    if (!volumen3D) return;
+    if (!volumen3D_1) return;
 
     QImage original = extraerSliceComoQImage(sliceIndex);
 
@@ -104,10 +149,16 @@ void FiltersWindow::mostrarSlice(int sliceIndex) {
 
     ui->imageLabelOM->setPixmap(QPixmap::fromImage(
                                     aplicarMorfologiaTopHat(original)).scaled(ui->imageLabelOM->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelUB->setPixmap(QPixmap::fromImage(
+                                    aplicarThreshold(original)).scaled(ui->imageLabelUB->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelBR->setPixmap(QPixmap::fromImage(
+                                    aplicarBinarizacionColor(original)).scaled(ui->imageLabelBR->size(), Qt::KeepAspectRatio));
 }
 
 QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
-    if (!volumen3D) return QImage();
+    if (!volumen3D_1) return QImage();
 
     using ExtractFilterType = itk::ExtractImageFilter<ImageType3D, ImageType2D>;
     using UCharImageType = itk::Image<unsigned char, 2>;
@@ -115,7 +166,7 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
 
     ExtractFilterType::Pointer extractor = ExtractFilterType::New();
 
-    ImageType3D::RegionType inputRegion = volumen3D->GetLargestPossibleRegion();
+    ImageType3D::RegionType inputRegion = volumen3D_1->GetLargestPossibleRegion();
     ImageType3D::SizeType size = inputRegion.GetSize();
     ImageType3D::IndexType start = inputRegion.GetIndex();
 
@@ -127,7 +178,7 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
     desiredRegion.SetIndex(start);
 
     extractor->SetExtractionRegion(desiredRegion);
-    extractor->SetInput(volumen3D);
+    extractor->SetInput(volumen3D_1);
     extractor->SetDirectionCollapseToSubmatrix();
 
     try {
@@ -168,3 +219,65 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
     }
     return image;
 }
+
+void FiltersWindow::on_DescHE_clicked()
+{
+    QString texto = "Histogram Equalization improves contrast using the gray level distribution.\n"
+                    "In OpenCV, cv::equalizeHist is used to implement it.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+void FiltersWindow::on_DescIS_clicked()
+{
+    QString texto = "Image Smoothing reduces noise by smoothing the image.\n"
+                    "In OpenCV, cv::GaussianBlur is used to apply a Gaussian filter.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescMO_clicked()
+{
+    QString texto = "Morphological Operation applies shape-based transformations.\n"
+                    "In OpenCV, functions like cv::morphologyEx are used for top hat, black hat, etc. operations.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescED_clicked()
+{
+    QString texto = "Edge Detection detects edges by highlighting abrupt changes in intensity.\n"
+                    "In OpenCV, cv::Canny is used for edge detection.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescPM_clicked()
+{
+    QString texto = "Pixel Manipulation modifies pixel values ​​to improve contrast or brightness.\n"
+                    "In OpenCV, cv::convertTo is used to adjust contrast and brightness.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescBT_clicked()
+{
+    QString texto = "Basic Thresholding segments the image using a threshold to separate regions.\n"
+                    "In OpenCV, cv::threshold is used to apply fixed or adaptive thresholding.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescBC_clicked()
+{
+    QString texto = "Binarization By Color segments by color range to extract specific regions. \n"
+                    "In OpenCV, cv::inRange is used for color binarization.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
