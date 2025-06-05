@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QImage>
 #include <QPixmap>
+#include "statswindow.h"
 
 // ITK
 #include "itkImageFileReader.h"
@@ -14,13 +15,13 @@
 #include <opencv2/opencv.hpp>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), currentSlice(0) {
+    : QMainWindow(parent), ui(new Ui::MainWindow), currentSlice(0), statsWindow(nullptr) {
     ui->setupUi(this);
 
     filtersWindow = new FiltersWindow(this);
 
     connect(ui->checkBoxShowMessage, &QCheckBox::toggled, this, &MainWindow::on_checkBoxShowMessage_toggled);
-    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png"; // Cambia esta ruta
+    QString rutaImagen = "/home/henryg/Imágenes/Logo_Universidad_Politécnica_Salesiana_del_Ecuador.png";
     QPixmap pixmap(rutaImagen);
     if (!pixmap.isNull()) {
         ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -31,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
     delete ui;
+    delete statsWindow;
 }
 
 void MainWindow::on_checkBoxShowMessage_toggled(bool checked) {
@@ -48,7 +50,6 @@ void MainWindow::on_checkBoxShowMessage_toggled(bool checked) {
         filtersWindow->close();
     }
 }
-
 
 void MainWindow::on_loadFile_clicked() {
     niftiPath1 = QFileDialog::getOpenFileName(this, "Cargar archivo NIfTI 1", "", "NIfTI files (*.nii *.nii.gz)");
@@ -113,6 +114,11 @@ void MainWindow::on_sliceSlider_valueChanged(int value) {
     currentSlice = value;
     mostrarImagenProcesada(value);
     mostrarSegmentacion(value);
+
+    if (statsWindow && statsWindow->isVisible()) {
+        statsWindow->setImagenes(imagen3D_1, imagen3D_2, currentSlice);
+        statsWindow->actualizarSegunContexto();
+    }
 }
 
 void MainWindow::mostrarImagenProcesada(int sliceIndex) {
@@ -252,4 +258,19 @@ void MainWindow::mostrarSegmentacion(int sliceIndex) {
     ui->labelImagen2->setPixmap(QPixmap::fromImage(qImgSeg).scaled(ui->labelImagen2->size(), Qt::KeepAspectRatio));
     ui->labelImagen3->setPixmap(QPixmap::fromImage(qImgOverlay).scaled(ui->labelImagen3->size(), Qt::KeepAspectRatio));
 }
+
+void MainWindow::on_btnEstadisticas_clicked() {
+    if (!imagen3D_1 || !imagen3D_2) {
+        QMessageBox::warning(this, "Advertencia", "Carga ambas imágenes antes de mostrar estadísticas.");
+        return;
+    }
+
+    if (!statsWindow) {
+        statsWindow = new StatsWindow(nullptr);
+    }
+
+    statsWindow->setImagenes(imagen3D_1, imagen3D_2, currentSlice);
+    statsWindow->show();
+}
+
 

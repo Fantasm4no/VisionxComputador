@@ -14,7 +14,7 @@ FiltersWindow::FiltersWindow(QWidget *parent)
     ui->setupUi(this);
     descWindow = new descriptionwindow(this);
     descWindow->setWindowModality(Qt::WindowModal);
-    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png"; // Cambia esta ruta
+    QString rutaImagen = "/home/henryg/Imágenes/Logo_Universidad_Politécnica_Salesiana_del_Ecuador.png"; // Cambia esta ruta
     QPixmap pixmap(rutaImagen);
     if (!pixmap.isNull()) {
         ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
