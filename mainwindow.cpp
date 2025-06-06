@@ -4,6 +4,12 @@
 #include <QMessageBox>
 #include <QImage>
 #include <QPixmap>
+#include <QDir>
+#include <QFileInfoList>
+#include <iostream>
+#include <algorithm>
+#include <regex>
+
 #include "statswindow.h"
 
 // ITK
@@ -21,12 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
     filtersWindow = new FiltersWindow(this);
 
     connect(ui->checkBoxShowMessage, &QCheckBox::toggled, this, &MainWindow::on_checkBoxShowMessage_toggled);
-    QString rutaImagen = "/home/henryg/Imágenes/Logo_Universidad_Politécnica_Salesiana_del_Ecuador.png";
+    connect(ui->genVideo, &QPushButton::clicked, this, &MainWindow::generarVideo);
+    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png";
     QPixmap pixmap(rutaImagen);
     if (!pixmap.isNull()) {
         ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
-        QMessageBox::warning(this, "Error", "No se pudo cargar la imagen.");
+        QMessageBox::warning(this, "Error", "The image could not be loaded.");
     }
 }
 
@@ -40,10 +47,10 @@ void MainWindow::on_checkBoxShowMessage_toggled(bool checked) {
 
     if (checked) {
         if (imagen3D_1) {
-            filtersWindow->setVolume(imagen3D_1);
+            filtersWindow->setVolumes(imagen3D_1, imagen3D_2);
             filtersWindow->show();
         } else {
-            QMessageBox::warning(this, "Advertencia", "Primero carga una imagen.");
+            QMessageBox::warning(this, "Warning", "First upload an image.");
             ui->checkBoxShowMessage->setChecked(false);
         }
     } else {
@@ -52,10 +59,14 @@ void MainWindow::on_checkBoxShowMessage_toggled(bool checked) {
 }
 
 void MainWindow::on_loadFile_clicked() {
-    niftiPath1 = QFileDialog::getOpenFileName(this, "Cargar archivo NIfTI 1", "", "NIfTI files (*.nii *.nii.gz)");
+    niftiPath1 = QFileDialog::getOpenFileName(this, "Upload NIfTI 1 file", "", "NIfTI files (*.nii *.nii.gz)");
     if (niftiPath1.isEmpty()) return;
 
-    ui->labelRuta->setText("Imagen 1 cargada correctamente.");
+    ui->labelRuta->setText("Image 1 loaded successfully.");
+
+    // Obtener el nombre base del archivo sin la extensión
+    QFileInfo fileInfo(niftiPath1);
+    QString baseName = fileInfo.baseName();
 
     using ReaderType = itk::ImageFileReader<ImageType3D>;
     ReaderType::Pointer reader = ReaderType::New();
@@ -65,19 +76,22 @@ void MainWindow::on_loadFile_clicked() {
         reader->Update();
         imagen3D_1 = reader->GetOutput();
     } catch (itk::ExceptionObject &error) {
-        QMessageBox::critical(this, "Error", "No se pudo leer el archivo NIfTI 1.");
+        QMessageBox::critical(this, "Error", "Could not read NIfTI file 1.");
         return;
     }
+
+    // Asignar el nombre base para usarlo en las imágenes guardadas
+    imagenBaseName = baseName;  // Guardar el nombre base de la imagen
 
     actualizarTotalSlices();
     mostrarImagenProcesada(currentSlice);
 }
 
 void MainWindow::on_loadFile2_clicked() {
-    niftiPath2 = QFileDialog::getOpenFileName(this, "Cargar archivo NIfTI 2", "", "NIfTI files (*.nii *.nii.gz)");
+    niftiPath2 = QFileDialog::getOpenFileName(this, "Upload NIfTI 2 file", "", "NIfTI files (*.nii *.nii.gz)");
     if (niftiPath2.isEmpty()) return;
 
-    ui->labelRuta2->setText("Imagen 2 cargada correctamente.");
+    ui->labelRuta2->setText("Image 2 loaded successfully.");
 
     using ReaderType = itk::ImageFileReader<ImageType3D>;
     ReaderType::Pointer reader = ReaderType::New();
@@ -87,7 +101,7 @@ void MainWindow::on_loadFile2_clicked() {
         reader->Update();
         imagen3D_2 = reader->GetOutput();
     } catch (itk::ExceptionObject &error) {
-        QMessageBox::critical(this, "Error", "No se pudo leer el archivo NIfTI 2.");
+        QMessageBox::critical(this, "Error", "Could not read NIfTI file 2.");
         return;
     }
 
@@ -112,8 +126,17 @@ void MainWindow::actualizarTotalSlices() {
 
 void MainWindow::on_sliceSlider_valueChanged(int value) {
     currentSlice = value;
+
+    // Solo guardar la imagen si el slider ha avanzado
+    if (currentSlice > lastSliceIndex) {
+        mostrarSegmentacion(currentSlice);  // Guardar la imagen solo si el slider avanza
+    }
+
     mostrarImagenProcesada(value);
     mostrarSegmentacion(value);
+
+    // Actualizar el índice anterior
+    lastSliceIndex = currentSlice;
 
     if (statsWindow && statsWindow->isVisible()) {
         statsWindow->setImagenes(imagen3D_1, imagen3D_2, currentSlice);
@@ -220,43 +243,121 @@ QImage MainWindow::MatToQImage(const cv::Mat &mat) {
 void MainWindow::mostrarSegmentacion(int sliceIndex) {
     if (!imagen3D_1 || !imagen3D_2) return;
 
-    // Extraer slice t1ce como QImage (grayscale)
     QImage qImgT1ce = extraerSliceComoQImage(imagen3D_1, sliceIndex);
+    QImage qImgSeg  = extraerSliceComoQImage(imagen3D_2, sliceIndex);
 
-    // Extraer slice segmentación como QImage (grayscale)
-    QImage qImgSeg = extraerSliceComoQImage(imagen3D_2, sliceIndex);
+    cv::Mat matT1ce = QImageToMat(qImgT1ce);  // Grayscale
+    cv::Mat matSeg  = QImageToMat(qImgSeg);   // Segmentación
 
-    // Convertir QImage a cv::Mat (escala de grises)
-    cv::Mat matT1ce = QImageToMat(qImgT1ce);
-    cv::Mat matSeg = QImageToMat(qImgSeg);
-
-    // Crear máscara binaria con un umbral
-    cv::Mat maskBinaria;
-    cv::threshold(matSeg, maskBinaria, 10, 255, cv::THRESH_BINARY);
-
-    // Convertir t1ce a imagen color (BGR) para hacer overlay
+    // Convertir a BGR color
     cv::Mat matT1ceColor;
     cv::cvtColor(matT1ce, matT1ceColor, cv::COLOR_GRAY2BGR);
 
-    // Superponer color rojo semi-transparente donde la máscara es blanca
+    // Fusión con un rojo más sólido
     for (int y = 0; y < matT1ceColor.rows; ++y) {
         for (int x = 0; x < matT1ceColor.cols; ++x) {
-            if (maskBinaria.at<uchar>(y, x) > 0) {
-                cv::Vec3b &pixel = matT1ceColor.at<cv::Vec3b>(y, x);
-                pixel[0] = static_cast<uchar>(pixel[0] * 0.5);          // Azul
-                pixel[1] = static_cast<uchar>(pixel[1] * 0.5);          // Verde
-                pixel[2] = std::min(255, pixel[2] / 2 + 128);           // Rojo más intenso
+            uchar segVal = matSeg.at<uchar>(y, x);
+            if (segVal > 0) {
+                // Ahora se usa rojo sólido sin mezcla de opacidad
+                cv::Vec3b& pix = matT1ceColor.at<cv::Vec3b>(y, x);
+
+                // No modificar B y G, solo añadir rojo sólido
+                pix[0] = static_cast<uchar>(pix[0] * 0.3);  // B (disminuir)
+                pix[1] = static_cast<uchar>(pix[1] * 0.3);  // G (disminuir)
+                pix[2] = 255;  // Rojo sólido (máxima intensidad)
             }
         }
     }
 
-    // Convertir de nuevo a QImage
+    // Mostrar en la interfaz
     QImage qImgOverlay = MatToQImage(matT1ceColor);
-
-    // Mostrar las imágenes en cada label
     ui->labelImagen->setPixmap(QPixmap::fromImage(qImgT1ce).scaled(ui->labelImagen->size(), Qt::KeepAspectRatio));
     ui->labelImagen2->setPixmap(QPixmap::fromImage(qImgSeg).scaled(ui->labelImagen2->size(), Qt::KeepAspectRatio));
     ui->labelImagen3->setPixmap(QPixmap::fromImage(qImgOverlay).scaled(ui->labelImagen3->size(), Qt::KeepAspectRatio));
+
+    QString folderPath = "/home/f4ntasmano/Downloads/" + imagenBaseName;
+    QDir dir(folderPath);
+    if (!dir.exists()) {
+        dir.mkpath(".");  // Crea la carpeta si no existe
+    }
+
+    std::string filename = folderPath.toStdString() + "/slice_" + std::to_string(sliceIndex) + "_resaltado.png";
+
+    cv::imwrite(filename, matT1ceColor);
+}
+
+void MainWindow::generarVideo() {
+    // Definir la carpeta donde se encuentran las imágenes
+    QString folderPath = "/home/f4ntasmano/Downloads/" + imagenBaseName;
+    QDir dir(folderPath);
+
+    // Obtener todas las imágenes en la carpeta (ordenadas por nombre)
+    QFileInfoList files = dir.entryInfoList(QStringList() << "*.png", QDir::Files, QDir::Name);
+
+    if (files.isEmpty()) {
+        std::cerr << "No se encontraron imágenes en la carpeta." << std::endl;
+        return;
+    }
+
+    // Crear una lista con los nombres de las imágenes ordenadas por el índice del slice
+    std::vector<QFileInfo> sortedFiles;
+    for (const QFileInfo &fileInfo : files) {
+        sortedFiles.push_back(fileInfo);
+    }
+
+    // Ordenar las imágenes numéricamente utilizando una expresión regular para extraer el número de cada archivo
+    std::sort(sortedFiles.begin(), sortedFiles.end(), [](const QFileInfo &a, const QFileInfo &b) {
+        // Extraer el número del slice utilizando una expresión regular
+        std::regex re(R"(\d+)"); // Expresión regular para encontrar el número en el nombre del archivo
+        std::smatch matchA, matchB;
+
+        std::string nameA = a.baseName().toStdString();
+        std::string nameB = b.baseName().toStdString();
+
+        // Buscar el número en el nombre del archivo
+        std::regex_search(nameA, matchA, re);
+        std::regex_search(nameB, matchB, re);
+
+        // Comparar los números extraídos de los nombres de archivo
+        int sliceIndexA = std::stoi(matchA.str());
+        int sliceIndexB = std::stoi(matchB.str());
+
+        return sliceIndexA < sliceIndexB;  // Ordenar numéricamente
+    });
+
+    // Leer la primera imagen para obtener el tamaño del video
+    cv::Mat firstImage = cv::imread(sortedFiles[0].absoluteFilePath().toStdString());
+    if (firstImage.empty()) {
+        std::cerr << "No se pudo leer la primera imagen." << std::endl;
+        return;
+    }
+
+    // Configurar el VideoWriter (nombre del archivo de salida, códec, fps, tamaño)
+    std::string videoFilename = folderPath.toStdString() + "/video_salida.avi";
+    cv::VideoWriter videoWriter;
+    int fourcc = cv::VideoWriter::fourcc('M', 'J', 'P', 'G');  // Códec MJPEG
+    double fps = 10.0;  // Frecuencia de cuadros (puedes ajustarlo según tus necesidades)
+    videoWriter.open(videoFilename, fourcc, fps, firstImage.size(), true);
+
+    if (!videoWriter.isOpened()) {
+        std::cerr << "No se pudo abrir el archivo de video para escritura." << std::endl;
+        return;
+    }
+
+    // Escribir las imágenes en el video
+    for (const QFileInfo &fileInfo : sortedFiles) {
+        cv::Mat img = cv::imread(fileInfo.absoluteFilePath().toStdString());
+        if (img.empty()) {
+            std::cerr << "No se pudo leer la imagen: " << fileInfo.absoluteFilePath().toStdString() << std::endl;
+            continue;
+        }
+
+        // Escribir el frame al video
+        videoWriter.write(img);
+    }
+
+    std::cout << "Video guardado en: " << videoFilename << std::endl;
+    videoWriter.release();  // Liberar el VideoWriter cuando haya terminado
 }
 
 void MainWindow::on_btnEstadisticas_clicked() {
