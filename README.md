@@ -64,7 +64,7 @@ text
 ## Estructura del proyecto
 
 text
-visor-nifti/
+visionproyecto/
 │
 ├── CMakeLists.txt        # Archivo de configuración de CMake
 ├── Source Files/         # Código fuente de la aplicación
