@@ -62,7 +62,7 @@ Ejecuta la aplicación:
 - Aplica filtros como suavizado, detección de bordes o ecualización para mejorar la visualización.
 - Resalta áreas de interés, como tumores, utilizando las herramientas de segmentación disponibles.
 - Puedes generar un video de los cortes con transiciones suaves.
-- 
+
 ## Estructura del proyecto
 
 ```bash
