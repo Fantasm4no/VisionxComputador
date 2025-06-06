@@ -240,50 +240,106 @@ QImage MainWindow::MatToQImage(const cv::Mat &mat) {
     }
 }
 
+QImage MainWindow::aplicarFiltroPrewitt(const QImage &input) {
+    // Convertir la imagen QImage a cv::Mat (escala de grises)
+    cv::Mat img = QImageToMat(input);
+    cv::Mat resultX, resultY, result;
+
+    // Filtro Prewitt en X y Y
+    cv::Mat kernelX = (cv::Mat_<float>(3, 3) << -1, 0, 1, -1, 0, 1, -1, 0, 1);
+    cv::Mat kernelY = (cv::Mat_<float>(3, 3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
+
+    // Aplicar filtro Prewitt en ambas direcciones
+    cv::filter2D(img, resultX, CV_32F, kernelX);  // Detectar bordes en dirección X
+    cv::filter2D(img, resultY, CV_32F, kernelY);  // Detectar bordes en dirección Y
+
+    // Magnitud de los bordes
+    cv::magnitude(resultX, resultY, result);
+
+    // Normalizar la imagen para tener valores entre 0 y 255
+    result.convertTo(result, CV_8UC1);  // Convertir a tipo 8 bits por canal
+
+    return MatToQImage(result);  // Convertir el resultado de nuevo a QImage
+}
+
 void MainWindow::mostrarSegmentacion(int sliceIndex) {
     if (!imagen3D_1 || !imagen3D_2) return;
 
-    QImage qImgT1ce = extraerSliceComoQImage(imagen3D_1, sliceIndex);
-    QImage qImgSeg  = extraerSliceComoQImage(imagen3D_2, sliceIndex);
+    // Extraer slices
+    QImage qImgT1ce = extraerSliceComoQImage(imagen3D_1, sliceIndex);  // Imagen original (densidades)
+    QImage qImgSeg  = extraerSliceComoQImage(imagen3D_2, sliceIndex);  // Segmentación
 
-    cv::Mat matT1ce = QImageToMat(qImgT1ce);  // Grayscale
+    // Convertir imágenes a cv::Mat
+    cv::Mat matT1ce = QImageToMat(qImgT1ce);  // Imagen original escala de grises (valores HU)
     cv::Mat matSeg  = QImageToMat(qImgSeg);   // Segmentación
 
-    // Convertir a BGR color
-    cv::Mat matT1ceColor;
-    cv::cvtColor(matT1ce, matT1ceColor, cv::COLOR_GRAY2BGR);
+    // Convertir la imagen original a color para pintar
+    cv::Mat matColor;
+    cv::cvtColor(matT1ce, matColor, cv::COLOR_GRAY2BGR);
 
-    // Fusión con un rojo más sólido
-    for (int y = 0; y < matT1ceColor.rows; ++y) {
-        for (int x = 0; x < matT1ceColor.cols; ++x) {
+    // Parámetros del rango de densidad (ajusta según tus datos reales)
+    float valorMin = 0.0f;    // Mínimo valor HU en ROI
+    float valorMax = 255.0f;  // Máximo valor HU en ROI
+
+    // Aplicar esquema de color basado en V a regiones segmentadas
+    for (int y = 0; y < matColor.rows; ++y) {
+        for (int x = 0; x < matColor.cols; ++x) {
             uchar segVal = matSeg.at<uchar>(y, x);
             if (segVal > 0) {
-                // Ahora se usa rojo sólido sin mezcla de opacidad
-                cv::Vec3b& pix = matT1ceColor.at<cv::Vec3b>(y, x);
+                float valorHU = static_cast<float>(matT1ce.at<uchar>(y, x));
 
-                // No modificar B y G, solo añadir rojo sólido
-                pix[0] = static_cast<uchar>(pix[0] * 0.3);  // B (disminuir)
-                pix[1] = static_cast<uchar>(pix[1] * 0.3);  // G (disminuir)
-                pix[2] = 255;  // Rojo sólido (máxima intensidad)
+                // Normalizar y limitar V
+                float V = (valorHU - valorMin) / (valorMax - valorMin);
+                V = std::clamp(V, 0.0f, 1.0f);
+
+                cv::Vec3b &pix = matColor.at<cv::Vec3b>(y, x);
+
+                if (V <= 0.5f) {
+                    pix[2] = static_cast<uchar>(255 * (1 - 2 * V));  // Rojo
+                    pix[1] = static_cast<uchar>(255 * (2 * V));      // Verde
+                    pix[0] = 0;                                       // Azul
+                } else {
+                    pix[2] = 0;                                       // Rojo
+                    pix[1] = static_cast<uchar>(255 * (2 - 2 * V));  // Verde
+                    pix[0] = static_cast<uchar>(255 * (2 * V - 1));  // Azul
+                }
             }
         }
     }
 
-    // Mostrar en la interfaz
-    QImage qImgOverlay = MatToQImage(matT1ceColor);
+    // Opcional: Aplicar filtro Prewitt para obtener bordes (en escala de grises)
+    QImage qImgPrewitt = aplicarFiltroPrewitt(qImgT1ce);
+    cv::Mat matPrewitt = QImageToMat(qImgPrewitt);
+
+    // Superponer bordes (blanco) sobre la imagen coloreada para resaltarlos
+    // Superponer bordes con mezcla suave (blending)
+    for (int y = 0; y < matPrewitt.rows; ++y) {
+        for (int x = 0; x < matPrewitt.cols; ++x) {
+            uchar bordeVal = matPrewitt.at<uchar>(y, x);
+            if (bordeVal > 50) {  // Umbral para borde
+                cv::Vec3b &pix = matColor.at<cv::Vec3b>(y, x);
+
+                // Mezcla simple: 70% color original + 30% blanco para suavizar el borde
+                pix[0] = static_cast<uchar>(pix[0] * 0.7 + 255 * 0.3);  // Azul
+                pix[1] = static_cast<uchar>(pix[1] * 0.7 + 255 * 0.3);  // Verde
+                pix[2] = static_cast<uchar>(pix[2] * 0.7 + 255 * 0.3);  // Rojo
+            }
+        }
+    }
+
+    // Mostrar imágenes en UI
+    QImage qImgOverlay = MatToQImage(matColor);
     ui->labelImagen->setPixmap(QPixmap::fromImage(qImgT1ce).scaled(ui->labelImagen->size(), Qt::KeepAspectRatio));
     ui->labelImagen2->setPixmap(QPixmap::fromImage(qImgSeg).scaled(ui->labelImagen2->size(), Qt::KeepAspectRatio));
     ui->labelImagen3->setPixmap(QPixmap::fromImage(qImgOverlay).scaled(ui->labelImagen3->size(), Qt::KeepAspectRatio));
 
+    // Guardar imagen coloreada
     QString folderPath = "/home/f4ntasmano/Downloads/" + imagenBaseName;
     QDir dir(folderPath);
-    if (!dir.exists()) {
-        dir.mkpath(".");  // Crea la carpeta si no existe
-    }
+    if (!dir.exists()) dir.mkpath(".");
 
     std::string filename = folderPath.toStdString() + "/slice_" + std::to_string(sliceIndex) + "_resaltado.png";
-
-    cv::imwrite(filename, matT1ceColor);
+    cv::imwrite(filename, matColor);
 }
 
 void MainWindow::generarVideo() {

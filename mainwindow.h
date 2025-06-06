@@ -24,6 +24,7 @@ public:
 
     Mat QImageToMat(const QImage &image);
     QImage MatToQImage(const Mat &mat);
+    QImage aplicarFiltroPrewitt(const QImage &input);
 
 private slots:
     void on_loadFile_clicked();
