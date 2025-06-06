@@ -24,34 +24,36 @@ Este proyecto consiste en una herramienta de escritorio desarrollada en C++ que 
 
 ### Instalación
 Clona el repositorio:
-text
+```bash
 git clone https://github.com/Fantasm4no/VisionxComputador.git
-
+```
 
 Accede al directorio del proyecto:
-text
+```bash
 cd visionproyecto
-
+```
 
 Crea un directorio para la compilación:
-text
+```bash
 mkdir build
 cd build
+```
 
 Ejecuta CMake para generar los archivos de construcción:
 
-text
+```bash
 cmake ..
-
+```
 
 Compila el proyecto:
-text
+```bash
 make
-
+```
 
 Ejecuta la aplicación:
-text
+```bash
 ./visionproyecto
+```
 
 ## Uso
 
