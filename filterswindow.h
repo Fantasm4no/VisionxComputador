@@ -19,7 +19,7 @@ public:
     explicit FiltersWindow(QWidget *parent = nullptr);
     ~FiltersWindow();
 
-    void setVolume(ImageType3D::Pointer volumen);
+    void setVolumes(ImageType3D::Pointer volumen, ImageType3D::Pointer volumen2);
 
 private slots:
     void on_sliceSlider_valueChanged(int value);  // El nombre y firma deben coincidir
@@ -42,10 +42,11 @@ private:
     descriptionwindow *descWindow;
 
     ImageType3D::Pointer volumen3D_1;
+    ImageType3D::Pointer volumen3D_2;
     int totalSlices = 0;
 
     void mostrarSlice(int sliceIndex);
-    QImage extraerSliceComoQImage(int sliceIndex);
+    QImage extraerSliceComoQImage(int sliceIndex,ImageType3D::Pointer volumen);
     void MatToQImage();
 };
 

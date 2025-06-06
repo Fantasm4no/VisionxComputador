@@ -14,7 +14,7 @@ FiltersWindow::FiltersWindow(QWidget *parent)
     ui->setupUi(this);
     descWindow = new descriptionwindow(this);
     descWindow->setWindowModality(Qt::WindowModal);
-    QString rutaImagen = "/home/henryg/Imágenes/Logo_Universidad_Politécnica_Salesiana_del_Ecuador.png"; // Cambia esta ruta
+    QString rutaImagen = "/home/f4ntasmano/Downloads/ups.png";
     QPixmap pixmap(rutaImagen);
     if (!pixmap.isNull()) {
         ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -72,6 +72,29 @@ QImage aplicarManipulacionPixeles(const QImage &input) {
     return MatToQImage(stretched);
 }
 
+QImage aplicarOperacionNOT(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat result;
+    cv::bitwise_not(img, result);  // Invertir los valores de la imagen
+    return MatToQImage(result);
+}
+
+QImage aplicarOperacionAND(const QImage &input1, const QImage &input2) {
+    cv::Mat img1 = QImageToMat(input1);
+    cv::Mat img2 = QImageToMat(input2);
+    cv::Mat result;
+    cv::bitwise_and(img1, img2, result);  // Operación AND sobre las dos imágenes
+    return MatToQImage(result);
+}
+
+QImage aplicarOperacionOR(const QImage &input1, const QImage &input2) {
+    cv::Mat img1 = QImageToMat(input1);
+    cv::Mat img2 = QImageToMat(input2);
+    cv::Mat result;
+    cv::bitwise_or(img1, img2, result);  // Operación OR sobre las dos imágenes
+    return MatToQImage(result);
+}
+
 QImage aplicarMorfologiaTopHat(const QImage &input) {
     // Convertir QImage a cv::Mat
     cv::Mat original = QImageToMat(input);
@@ -115,50 +138,87 @@ QImage aplicarBinarizacionColor(const QImage &input, int low=100, int high=255) 
     return MatToQImage(result);
 }
 
-void FiltersWindow::setVolume(ImageType3D::Pointer volumen) {
-    volumen3D_1 = volumen;
-    if (!volumen3D_1) return;
+QImage aplicarFiltroPrewitt(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat resultX, resultY, result;
+
+    // Filtro Prewitt en X y Y
+    cv::Mat kernelX = (cv::Mat_<float>(3, 3) << -1, 0, 1, -1, 0, 1, -1, 0, 1);
+    cv::Mat kernelY = (cv::Mat_<float>(3, 3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
+
+    cv::filter2D(img, resultX, CV_32F, kernelX);
+    cv::filter2D(img, resultY, CV_32F, kernelY);
+
+    // Magnitud de los bordes
+    cv::magnitude(resultX, resultY, result);
+
+    // Normalizar entre 0 y 255
+    result.convertTo(result, CV_8UC1);
+
+    return MatToQImage(result);
+}
+
+void FiltersWindow::setVolumes(ImageType3D::Pointer volumen1, ImageType3D::Pointer volumen2) {
+    volumen3D_1 = volumen1;  // Primer volumen
+    volumen3D_2 = volumen2;  // Segundo volumen
+
+    if (!volumen3D_1 || !volumen3D_2) return;
 
     totalSlices = volumen3D_1->GetLargestPossibleRegion().GetSize()[2];
     ui->sliceSlider->setMaximum(totalSlices - 1);
     ui->sliceSlider->setValue(0);
 
+    // Mostrar el primer slice de ambos volúmenes
     mostrarSlice(0);
 }
+
 
 void FiltersWindow::on_sliceSlider_valueChanged(int value) {
     mostrarSlice(value);
 }
 
 void FiltersWindow::mostrarSlice(int sliceIndex) {
-    if (!volumen3D_1) return;
+    if (!volumen3D_1 || !volumen3D_2) return;
 
-    QImage original = extraerSliceComoQImage(sliceIndex);
+    QImage original1 = extraerSliceComoQImage(sliceIndex, volumen3D_1);
+    QImage original2 = extraerSliceComoQImage(sliceIndex, volumen3D_2);
 
     ui->imageLabelEH->setPixmap(QPixmap::fromImage(
-                                    aplicarEcualizacionHistograma(original)).scaled(ui->imageLabelEH->size(), Qt::KeepAspectRatio));
+                                    aplicarEcualizacionHistograma(original1)).scaled(ui->imageLabelEH->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelSI->setPixmap(QPixmap::fromImage(
-                                    aplicarSuavizadoGaussiano(original)).scaled(ui->imageLabelSI->size(), Qt::KeepAspectRatio));
+                                    aplicarSuavizadoGaussiano(original1)).scaled(ui->imageLabelSI->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelDB->setPixmap(QPixmap::fromImage(
-                                    aplicarDeteccionBordes(original)).scaled(ui->imageLabelDB->size(), Qt::KeepAspectRatio));
+                                    aplicarDeteccionBordes(original1)).scaled(ui->imageLabelDB->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelMP->setPixmap(QPixmap::fromImage(
-                                    aplicarManipulacionPixeles(original)).scaled(ui->imageLabelMP->size(), Qt::KeepAspectRatio));
+                                    aplicarManipulacionPixeles(original1)).scaled(ui->imageLabelMP->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelOM->setPixmap(QPixmap::fromImage(
-                                    aplicarMorfologiaTopHat(original)).scaled(ui->imageLabelOM->size(), Qt::KeepAspectRatio));
+                                    aplicarMorfologiaTopHat(original1)).scaled(ui->imageLabelOM->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelUB->setPixmap(QPixmap::fromImage(
-                                    aplicarThreshold(original)).scaled(ui->imageLabelUB->size(), Qt::KeepAspectRatio));
+                                    aplicarThreshold(original2)).scaled(ui->imageLabelUB->size(), Qt::KeepAspectRatio));
 
     ui->imageLabelBR->setPixmap(QPixmap::fromImage(
-                                    aplicarBinarizacionColor(original)).scaled(ui->imageLabelBR->size(), Qt::KeepAspectRatio));
+                                    aplicarBinarizacionColor(original2)).scaled(ui->imageLabelBR->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelON->setPixmap(QPixmap::fromImage(
+                                    aplicarOperacionNOT(original2)).scaled(ui->imageLabelON->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelOA->setPixmap(QPixmap::fromImage(
+                                    aplicarOperacionAND(original1,original2)).scaled(ui->imageLabelOA->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelOO->setPixmap(QPixmap::fromImage(
+                                    aplicarOperacionOR(original1,original2)).scaled(ui->imageLabelOO->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelPF->setPixmap(QPixmap::fromImage(
+                                    aplicarFiltroPrewitt(original2)).scaled(ui->imageLabelPF->size(), Qt::KeepAspectRatio));
 }
 
-QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
-    if (!volumen3D_1) return QImage();
+QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex, ImageType3D::Pointer volumen) {
+    if (!volumen) return QImage();
 
     using ExtractFilterType = itk::ExtractImageFilter<ImageType3D, ImageType2D>;
     using UCharImageType = itk::Image<unsigned char, 2>;
@@ -166,7 +226,7 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
 
     ExtractFilterType::Pointer extractor = ExtractFilterType::New();
 
-    ImageType3D::RegionType inputRegion = volumen3D_1->GetLargestPossibleRegion();
+    ImageType3D::RegionType inputRegion = volumen->GetLargestPossibleRegion();
     ImageType3D::SizeType size = inputRegion.GetSize();
     ImageType3D::IndexType start = inputRegion.GetIndex();
 
@@ -178,7 +238,7 @@ QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex) {
     desiredRegion.SetIndex(start);
 
     extractor->SetExtractionRegion(desiredRegion);
-    extractor->SetInput(volumen3D_1);
+    extractor->SetInput(volumen);
     extractor->SetDirectionCollapseToSubmatrix();
 
     try {

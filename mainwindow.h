@@ -24,6 +24,7 @@ public:
 
     Mat QImageToMat(const QImage &image);
     QImage MatToQImage(const Mat &mat);
+    QImage aplicarFiltroPrewitt(const QImage &input);
 
 private slots:
     void on_loadFile_clicked();
@@ -31,6 +32,7 @@ private slots:
     void on_sliceSlider_valueChanged(int value);
     void on_checkBoxShowMessage_toggled(bool checked);
     void on_btnEstadisticas_clicked();
+    void generarVideo();
 
 private:
     FiltersWindow *filtersWindow;
@@ -39,7 +41,9 @@ private:
 
     QString niftiPath1;
     QString niftiPath2;
+    QString imagenBaseName;
 
+    int lastSliceIndex = -1;
     int currentSlice = 0;
     int totalSlices = 0;
 
