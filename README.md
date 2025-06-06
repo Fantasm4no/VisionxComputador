@@ -62,8 +62,6 @@ text
 - Puedes generar un video de los cortes con transiciones suaves.
 
 ## Estructura del proyecto
-
-text
 visionproyecto/
 │
 ├── CMakeLists.txt        # Archivo de configuración de CMake
