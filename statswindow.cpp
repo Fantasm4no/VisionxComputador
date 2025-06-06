@@ -159,6 +159,7 @@ void StatsWindow::calcularMinMax() {
 
 
 void StatsWindow::calcularArea() {
+    ultimaEstadistica = AREA;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
         ui->labelResultado->setText("Sin datos para calcular área.");
