@@ -60,10 +60,10 @@ text
 - Aplica filtros como suavizado, detección de bordes o ecualización para mejorar la visualización.
 - Resalta áreas de interés, como tumores, utilizando las herramientas de segmentación disponibles.
 - Puedes generar un video de los cortes con transiciones suaves.
-
+- 
 ## Estructura del proyecto
 
-text
+```bash
 visionproyecto/
 │
 ├── CMakeLists.txt        # Archivo de configuración de CMake
@@ -79,6 +79,7 @@ visionproyecto/
 ├── output/               # Archivos de recursos (imágenes, iconos, etc.)
 ├── README.md             # Este archivo
 └── ...
+
 
 
 ## AUTORES
