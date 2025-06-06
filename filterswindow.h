@@ -37,6 +37,14 @@ private slots:
 
     void on_DescBC_clicked();
 
+    void on_DescON_clicked();
+
+    void on_DescOA_clicked();
+
+    void on_DescOO_clicked();
+
+    void on_DescPF_clicked();
+
 private:
     Ui::filterswindow *ui;
     descriptionwindow *descWindow;

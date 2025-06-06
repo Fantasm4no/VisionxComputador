@@ -129,7 +129,7 @@ void MainWindow::on_sliceSlider_valueChanged(int value) {
 
     // Solo guardar la imagen si el slider ha avanzado
     if (currentSlice > lastSliceIndex) {
-        mostrarSegmentacion(currentSlice);  // Guardar la imagen solo si el slider avanza
+        mostrarSegmentacion(currentSlice);
     }
 
     mostrarImagenProcesada(value);
@@ -334,7 +334,7 @@ void MainWindow::mostrarSegmentacion(int sliceIndex) {
     ui->labelImagen3->setPixmap(QPixmap::fromImage(qImgOverlay).scaled(ui->labelImagen3->size(), Qt::KeepAspectRatio));
 
     // Guardar imagen coloreada
-    QString folderPath = "/home/f4ntasmano/Downloads/" + imagenBaseName;
+    QString folderPath = "/home/f4ntasmano/Downloads/visionproyecto/output/" + imagenBaseName;
     QDir dir(folderPath);
     if (!dir.exists()) dir.mkpath(".");
 
@@ -343,15 +343,21 @@ void MainWindow::mostrarSegmentacion(int sliceIndex) {
 }
 
 void MainWindow::generarVideo() {
+    // Verificar si el slider ha llegado al final
+    if (currentSlice < totalSlices - 1) {
+        QMessageBox::warning(this, "Warning", "Please reach the last slice to generate the video.");
+        return;  // No genera el video si el slider no está al final
+    }
+
     // Definir la carpeta donde se encuentran las imágenes
-    QString folderPath = "/home/f4ntasmano/Downloads/" + imagenBaseName;
+    QString folderPath = "/home/f4ntasmano/Downloads/visionproyecto/output/" + imagenBaseName;
     QDir dir(folderPath);
 
     // Obtener todas las imágenes en la carpeta (ordenadas por nombre)
     QFileInfoList files = dir.entryInfoList(QStringList() << "*.png", QDir::Files, QDir::Name);
 
     if (files.isEmpty()) {
-        std::cerr << "No se encontraron imágenes en la carpeta." << std::endl;
+        std::cerr << "No images were found in the folder." << std::endl;
         return;
     }
 
@@ -363,18 +369,15 @@ void MainWindow::generarVideo() {
 
     // Ordenar las imágenes numéricamente utilizando una expresión regular para extraer el número de cada archivo
     std::sort(sortedFiles.begin(), sortedFiles.end(), [](const QFileInfo &a, const QFileInfo &b) {
-        // Extraer el número del slice utilizando una expresión regular
         std::regex re(R"(\d+)"); // Expresión regular para encontrar el número en el nombre del archivo
         std::smatch matchA, matchB;
 
         std::string nameA = a.baseName().toStdString();
         std::string nameB = b.baseName().toStdString();
 
-        // Buscar el número en el nombre del archivo
         std::regex_search(nameA, matchA, re);
         std::regex_search(nameB, matchB, re);
 
-        // Comparar los números extraídos de los nombres de archivo
         int sliceIndexA = std::stoi(matchA.str());
         int sliceIndexB = std::stoi(matchB.str());
 
@@ -384,7 +387,7 @@ void MainWindow::generarVideo() {
     // Leer la primera imagen para obtener el tamaño del video
     cv::Mat firstImage = cv::imread(sortedFiles[0].absoluteFilePath().toStdString());
     if (firstImage.empty()) {
-        std::cerr << "No se pudo leer la primera imagen." << std::endl;
+        std::cerr << "The first image could not be read." << std::endl;
         return;
     }
 
@@ -396,7 +399,7 @@ void MainWindow::generarVideo() {
     videoWriter.open(videoFilename, fourcc, fps, firstImage.size(), true);
 
     if (!videoWriter.isOpened()) {
-        std::cerr << "No se pudo abrir el archivo de video para escritura." << std::endl;
+        std::cerr << "Could not open video file for writing." << std::endl;
         return;
     }
 
@@ -404,7 +407,7 @@ void MainWindow::generarVideo() {
     for (const QFileInfo &fileInfo : sortedFiles) {
         cv::Mat img = cv::imread(fileInfo.absoluteFilePath().toStdString());
         if (img.empty()) {
-            std::cerr << "No se pudo leer la imagen: " << fileInfo.absoluteFilePath().toStdString() << std::endl;
+            std::cerr << "The image could not be read: " << fileInfo.absoluteFilePath().toStdString() << std::endl;
             continue;
         }
 
@@ -412,13 +415,13 @@ void MainWindow::generarVideo() {
         videoWriter.write(img);
     }
 
-    std::cout << "Video guardado en: " << videoFilename << std::endl;
+    std::cout << "Video saved in: " << videoFilename << std::endl;
     videoWriter.release();  // Liberar el VideoWriter cuando haya terminado
 }
 
 void MainWindow::on_btnEstadisticas_clicked() {
     if (!imagen3D_1 || !imagen3D_2) {
-        QMessageBox::warning(this, "Advertencia", "Carga ambas imágenes antes de mostrar estadísticas.");
+        QMessageBox::warning(this, "Warning", "Load both images before displaying statistics.");
         return;
     }
 

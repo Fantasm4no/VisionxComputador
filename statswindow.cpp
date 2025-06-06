@@ -1,14 +1,12 @@
 #include "statswindow.h"
 #include <QMessageBox>
 #include <QPixmap>
-#include <fstream>
 #include <numeric>
 #include <algorithm>
 #include <cmath>
 #include "ui_statswindow.h"
 #include "itkExtractImageFilter.h"
 #include "itkImageRegionConstIterator.h"
-#include "itkRescaleIntensityImageFilter.h"
 #include "qcustomplot.h"
 
 StatsWindow::StatsWindow(QWidget *parent)
@@ -89,21 +87,21 @@ void StatsWindow::calcularMedia() {
     ultimaEstadistica = MEDIA;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        ui->labelResultado->setText("No hay datos válidos.");
+        ui->labelResultado->setText("There is no valid data.");
         return;
     }
 
     float suma = std::accumulate(valores.begin(), valores.end(), 0.0f);
     float media = suma / valores.size();
     ultimaMedia = media;
-    ui->labelResultado->setText("Media: " + QString::number(media, 'f', 2));
+    ui->labelResultado->setText("Average: " + QString::number(media, 'f', 2));
 }
 
 void StatsWindow::calcularMediana() {
     ultimaEstadistica = MEDIANA;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        ui->labelResultado->setText("No hay datos válidos.");
+        ui->labelResultado->setText("There is no valid data.");
         return;
     }
 
@@ -117,14 +115,14 @@ void StatsWindow::calcularMediana() {
         mediana = valores[n / 2];
     }
     ultimaMediana = mediana;
-    ui->labelResultado->setText("Mediana: " + QString::number(mediana, 'f', 2));
+    ui->labelResultado->setText("Median: " + QString::number(mediana, 'f', 2));
 }
 
 void StatsWindow::calcularDesviacionEstandar() {
     ultimaEstadistica = DESVIACION;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        ui->labelResultado->setText("No hay datos válidos.");
+        ui->labelResultado->setText("There is no valid data.");
         return;
     }
 
@@ -135,14 +133,14 @@ void StatsWindow::calcularDesviacionEstandar() {
     }
     float desviacion = std::sqrt(suma / valores.size());
     ultimaDesviacion = desviacion;
-    ui->labelResultado->setText("Desviación estándar: " + QString::number(desviacion, 'f', 2));
+    ui->labelResultado->setText("Standard deviation: " + QString::number(desviacion, 'f', 2));
 }
 
 void StatsWindow::calcularMinMax() {
     ultimaEstadistica = MINMAX;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        ui->labelResultado->setText("No hay datos válidos.");
+        ui->labelResultado->setText("There is no valid data.");
         return;
     }
 
@@ -153,8 +151,8 @@ void StatsWindow::calcularMinMax() {
     ultimoMin = minimo;   
     ultimoMax = maximo;
 
-    ui->labelResultado->setText("Mínimo: " + QString::number(minimo, 'f', 2) +
-                                "\nMáximo: " + QString::number(maximo, 'f', 2));
+    ui->labelResultado->setText("Min: " + QString::number(minimo, 'f', 2) +
+                                "\nMax: " + QString::number(maximo, 'f', 2));
 }
 
 
@@ -162,14 +160,14 @@ void StatsWindow::calcularArea() {
     ultimaEstadistica = AREA;
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        ui->labelResultado->setText("Sin datos para calcular área.");
+        ui->labelResultado->setText("No data to calculate area.");
         return;
     }
 
     double area = static_cast<double>(valores.size());  // cantidad de píxeles
     ultimaArea = area;
 
-    ui->labelResultado->setText("Área (número de valores): " + QString::number(area));
+    ui->labelResultado->setText("Area (number of values): " + QString::number(area));
 }
 
 
@@ -178,7 +176,7 @@ void StatsWindow::detectarOutliers() {
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.size() < 4) {
         cantidadOutliers = 0;
-        ui->labelResultado->setText("No hay suficientes datos para detectar outliers.");
+        ui->labelResultado->setText("There is not enough data to detect outliers.");
         return;
     }
 
@@ -197,7 +195,7 @@ void StatsWindow::detectarOutliers() {
     });
 
     cantidadOutliers = count;
-    ui->labelResultado->setText("Outliers detectados: " + QString::number(count));
+    ui->labelResultado->setText("Outliers detected: " + QString::number(count));
 }
 
 
@@ -209,7 +207,7 @@ void StatsWindow::mostrarBoxplot() {
     ui->customPlot->clearPlottables();
 
     if (valores.empty()) {
-        ui->labelResultado->setText("No hay datos válidos para graficar.");
+        ui->labelResultado->setText("There is no valid data to graph.");
         ui->customPlot->replot();
         return;
     }
@@ -307,7 +305,7 @@ void StatsWindow::mostrarBoxplot() {
 void StatsWindow::guardarEstadisticas() {
     std::vector<float> valores = extraerValoresDeInteres();
     if (valores.empty()) {
-        QMessageBox::warning(this, "Sin datos", "No hay datos válidos para guardar.");
+        QMessageBox::warning(this, "No data", "There is no valid data to save.");
         return;
     }
 
@@ -358,9 +356,9 @@ void StatsWindow::guardarEstadisticas() {
         out << ultimaMedia << "," << ultimaMediana << "," << ultimaDesviacion << ","
             << ultimoMin << "," << ultimoMax << "," << ultimaArea << "," << cantidadOutliers << "\n";
         file.close();
-        QMessageBox::information(this, "Guardado", "Estadísticas calculadas y guardadas correctamente.");
+        QMessageBox::information(this, "Saved", "Statistics calculated and saved correctly.");
     } else {
-        QMessageBox::warning(this, "Error", "No se pudo guardar el archivo.");
+        QMessageBox::warning(this, "Error", "The file could not be saved.");
     }
 }
 

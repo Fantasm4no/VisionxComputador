@@ -19,7 +19,7 @@ FiltersWindow::FiltersWindow(QWidget *parent)
     if (!pixmap.isNull()) {
         ui->labelUPS->setPixmap(pixmap.scaled(ui->labelUPS->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
     } else {
-        QMessageBox::warning(this, "Error", "No se pudo cargar la imagen.");
+        QMessageBox::warning(this, "Error", "The image could not be loaded.");
     }
 }
 
@@ -337,6 +337,42 @@ void FiltersWindow::on_DescBC_clicked()
 {
     QString texto = "Binarization By Color segments by color range to extract specific regions. \n"
                     "In OpenCV, cv::inRange is used for color binarization.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescON_clicked()
+{
+    QString texto = "NOT operation inverts the pixel values in an image. \n"
+                    "In OpenCV, cv::bitwise_not is used to invert all bits, flipping the pixel values.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescOA_clicked()
+{
+    QString texto = "AND operation is used to compare two binary images. \n"
+                    "In OpenCV, cv::bitwise_and is used to apply the AND operation between two images, highlighting common regions.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescOO_clicked()
+{
+    QString texto = "OR operation combines the features of two images. \n"
+                    "In OpenCV, cv::bitwise_or is used to apply the OR operation between two images, emphasizing both areas of interest.";
+    descWindow->setDescription(texto);
+    descWindow->show();
+}
+
+
+void FiltersWindow::on_DescPF_clicked()
+{
+    QString texto = "Prewitt Filter is a classic edge detection technique used to highlight the boundaries in an image. \n"
+                    "It uses convolution kernels in both horizontal and vertical directions to detect edges by emphasizing abrupt changes in intensity.";
     descWindow->setDescription(texto);
     descWindow->show();
 }
