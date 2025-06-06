@@ -138,6 +138,26 @@ QImage aplicarBinarizacionColor(const QImage &input, int low=100, int high=255) 
     return MatToQImage(result);
 }
 
+QImage aplicarFiltroPrewitt(const QImage &input) {
+    cv::Mat img = QImageToMat(input);
+    cv::Mat resultX, resultY, result;
+
+    // Filtro Prewitt en X y Y
+    cv::Mat kernelX = (cv::Mat_<float>(3, 3) << -1, 0, 1, -1, 0, 1, -1, 0, 1);
+    cv::Mat kernelY = (cv::Mat_<float>(3, 3) << -1, -1, -1, 0, 0, 0, 1, 1, 1);
+
+    cv::filter2D(img, resultX, CV_32F, kernelX);
+    cv::filter2D(img, resultY, CV_32F, kernelY);
+
+    // Magnitud de los bordes
+    cv::magnitude(resultX, resultY, result);
+
+    // Normalizar entre 0 y 255
+    result.convertTo(result, CV_8UC1);
+
+    return MatToQImage(result);
+}
+
 void FiltersWindow::setVolumes(ImageType3D::Pointer volumen1, ImageType3D::Pointer volumen2) {
     volumen3D_1 = volumen1;  // Primer volumen
     volumen3D_2 = volumen2;  // Segundo volumen
@@ -192,6 +212,9 @@ void FiltersWindow::mostrarSlice(int sliceIndex) {
 
     ui->imageLabelOO->setPixmap(QPixmap::fromImage(
                                     aplicarOperacionOR(original1,original2)).scaled(ui->imageLabelOO->size(), Qt::KeepAspectRatio));
+
+    ui->imageLabelPF->setPixmap(QPixmap::fromImage(
+                                    aplicarFiltroPrewitt(original2)).scaled(ui->imageLabelPF->size(), Qt::KeepAspectRatio));
 }
 
 QImage FiltersWindow::extraerSliceComoQImage(int sliceIndex, ImageType3D::Pointer volumen) {

@@ -339,10 +339,10 @@
   <widget class="QSlider" name="sliceSlider">
    <property name="geometry">
     <rect>
-     <x>760</x>
-     <y>660</y>
-     <width>431</width>
-     <height>16</height>
+     <x>990</x>
+     <y>670</y>
+     <width>281</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="orientation">
@@ -595,10 +595,10 @@
   <widget class="QLabel" name="label_8">
    <property name="geometry">
     <rect>
-     <x>770</x>
-     <y>600</y>
-     <width>421</width>
-     <height>31</height>
+     <x>1000</x>
+     <y>590</y>
+     <width>281</width>
+     <height>71</height>
     </rect>
    </property>
    <property name="font">
@@ -617,13 +617,19 @@
    <property name="text">
     <string>Scroll to be able to slide between slices</string>
    </property>
+   <property name="alignment">
+    <set>Qt::AlignmentFlag::AlignCenter</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QLabel" name="labelUPS">
    <property name="geometry">
     <rect>
-     <x>760</x>
+     <x>990</x>
      <y>720</y>
-     <width>451</width>
+     <width>281</width>
      <height>121</height>
     </rect>
    </property>
@@ -852,6 +858,86 @@
     </property>
    </widget>
    <widget class="QPushButton" name="DescOO">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>260</y>
+      <width>111</width>
+      <height>26</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Description</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QFrame" name="OpeOr_2">
+   <property name="geometry">
+    <rect>
+     <x>640</x>
+     <y>580</y>
+     <width>321</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(245, 245, 220);</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Shape::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Shadow::Raised</enum>
+   </property>
+   <widget class="QLabel" name="imageLabelPF">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>50</y>
+      <width>201</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="PreFil">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>171</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Noto Serif CJK JP</family>
+      <pointsize>16</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LayoutDirection::RightToLeft</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(205, 92, 92);</string>
+    </property>
+    <property name="text">
+     <string>Prewitt Filter</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="DescPF">
     <property name="geometry">
      <rect>
       <x>100</x>
